@@ -69,13 +69,6 @@ public class BoardCtr {
 		if(fileChk != 0) {
 			boardService.fileChkUpdate(bvo.getBoardNo());	
 		}
-//		List<Kmj_BoardVo> boardList=boardService.boardList();
-//		List<Kmj_FilesVo> downloadFileList=fileService.downloadFileList(0);
-//		
-//		model.addAttribute("boardList",boardList);
-//		model.addAttribute("downloadFileList",downloadFileList);
-//		model.addAttribute("path",path);
-		
 		return "redirect:/boardListOn";
 	}
 	

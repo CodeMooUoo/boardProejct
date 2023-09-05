@@ -1,0 +1,158 @@
+<!DOCTYPE html>
+<html lang="en">
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
+<html xmlns:th="http://www.thymeleaf.org">
+
+<head>
+	<meta charset="UTF-8">
+	<title>Title</title>
+</head>
+
+<body>
+게시판 상세 페이지
+
+	<form id="formSubmit" method="post">
+		<input name="boardNo" id="boardNo" type="hidden" th:value="${boardDetail.boardNo}">
+		<input name="depth" id="depth" type="hidden" th:value="${boardDetail.depth}">
+		<p>
+			<span th:text="'작성일자: '+${boardDetail.createDate}"></span><span th:if="${boardDetail.updateDate}!=null"
+				th:text="'/수정일자: '+${boardDetail.updateDate}"></span>
+		</p>
+
+
+
+		<p>
+			작성자: <input name="id" th:value="${boardDetail.id}" disabled />
+		</p>
+		<p>
+			제목: <input name="title" th:value="${boardDetail.title}" />
+		</p>
+		<p>
+			<textarea name="contents" th:text="${boardDetail.contents}"></textarea>
+		</p>
+
+		<table>
+			<tbody>
+				<tr th:if="${item.deleteChk == 1}" th:each="item : ${downloadFileList}">
+					<td th:text="${item.deleteChk}"></td>
+					<td>
+						<a th:text="${item.fileName+'.'+item.fileType}" th:href="|download/${item.storeFileName}|" />
+					</td>
+					<td><button class="deleteBtn" th:attr="data-filename=${item.storeFileName}"
+							data-boardno="${boardDetail.boardNo}">삭제</button></td>
+				</tr>
+			</tbody>
+		</table>
+		<br>
+		<button id="boardUpdate">수정</button>&nbsp;<button id="boardDelete">삭제</button>&nbsp;<button id="boardReplyForm">답글</button>
+		</form>
+		<br>
+		<button id="moveList">게시판 가기</button>
+		
+		<br>
+		<br>
+		<br>
+		<br>
+		
+		<button id="replyInsert">댓글 쓰기</button>
+		<table border="1">
+			<tr>
+				<th>ID</th>
+				<th>내용</th>
+				<th>작성 시간</th>
+			</tr>
+			
+			<tr th:each="item : ${replyList}" style="text-align: center;">
+				<td colspan="3" th:if="${item.replyNo != 0 && item.postOpenId == 0}" ><span th:text="${#strings.repeat('ㄴ', item.depth-1)}"></span><span>댓글이 삭제되었습니다.</span></td>
+				<td th:if="${item.replyNo != 0 && item.postOpenId != 0}"><span th:text="${item.id}"></span><span th:if="${item.id==sessionUserId}" style="color: red;">(작성자)</span></td>
+				<td th:if="${item.replyNo != 0 && item.postOpenId != 0}"><span th:text="${#strings.repeat('ㄴ', item.depth-1)}"></span><span th:text="${item.comments}"></span></span></td>
+				<td th:if="${item.replyNo != 0 && item.postOpenId != 0}" >
+				<span th:if="${item.updateDate}==null" th:text="${item.createDate}"></span>
+				<span th:unless="${item.updateDate}==null" th:text="${item.updateDate}+'[수정됨]'"></span>
+				</td>
+				<td th:if="${item.replyNo != 0 && item.postOpenId != 0}">
+				<button class="replyUpdateForm" th:attr="data-replyNo=${item.replyNo}">수정</button>
+				<button class="replyDelete" th:attr="data-replyNo=${item.replyNo}">삭제</button>
+				<button class="replyReply" th:attr="data-replyNo=${item.replyNo},data-depth=${item.depth}">답글</button>
+				</td>
+			</tr>
+			
+		</table>
+
+
+</body>
+<script th:inline="javascript">
+	let boardNo = $('#boardNo').val();
+	
+	$(function () {
+		$(".deleteBtn").click(function () {
+			let filename = $(this).data('filename');
+
+			console.log('filename' + filename);
+			console.log('boardno=>' + boardNo);
+			$.ajax({
+				url: "../fileDelete",
+				data: { // 파라미터를 객체로 전달합니다.
+					fileName: filename, // Thymeleaf의 변수 사용
+					boardNo: boardNo // 원하는 boardNo 값을 넣어줍니다.
+
+				},
+				method: "POST", // HTTP 요청 방식 지정 (POST로 변경)
+				success: function (data) {
+					$.each(data, function (index, item) {
+						console.log(item.fileName);
+					});
+				},
+				error: function (xhr, status, error) {
+					console.log("파일 삭제 실패");
+				}
+			});
+		});
+
+
+		$("#boardUpdate").click(function () {
+			$("#formSubmit").attr("action", "updateForm?boardNo=" + boardNo).submit();
+		});
+
+		$("#boardDelete").click(function () {
+			$("#formSubmit").attr("action", "boardDelete?boardNo=" + boardNo).submit();
+		});	
+		
+		$("#boardReplyForm").click(function (event) {
+   		event.preventDefault();
+   		let boardNo = $("#boardNo").val();
+   		let depth = $("#depth").val();
+    	location.href = "boardReplyForm/"+boardNo+"/"+depth;
+		});
+		
+		$("#moveList").click(function (event) {
+    	location.href = "boardListOn";
+		});
+		
+		$("#replyInsert").click(function (event) {
+	    	location.href = "replyForm?boardNo="+boardNo;
+			});
+		
+		$(".replyUpdateForm").click(function (event) {
+			let replyNo = $(this).attr('data-replyNo');
+			location.href = "replyUpdateForm?replyNo="+replyNo+"&boardNo="+boardNo;
+			});
+		
+		$(".replyDelete").click(function (event) {
+			let replyNo = $(this).attr('data-replyNo');
+			location.href = "replyDelte?replyNo="+replyNo+"&boardNo="+boardNo;
+			});
+		
+		$(".replyReply").click(function (event) {
+			let replyNo = $(this).attr('data-replyNo');
+			let depth = $(this).attr('data-depth');
+			location.href = "replyReplyFrom?associateNo="+replyNo+"&boardNo="+boardNo+"&depth="+depth;
+			});
+		
+		
+	});
+
+
+</script>
+
+</html>

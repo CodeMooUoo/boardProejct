@@ -1,0 +1,30 @@
+<!DOCTYPE html>
+<html lang="en">
+<html xmlns:th="http://www.thymeleaf.org">
+	
+<head>
+    <meta charset="UTF-8">
+    <title>Title</title>
+</head>
+<body>
+<h3>commnets 답글 달기</h3>
+<form action="replyReplyIn" method="post">
+	<input type="hidden" name="id" value="user1">
+	<input type="hidden" name="associateNo" th:value="${rvo.associateNo}"/>
+	<input type="hidden" name="boardNo" th:value="${rvo.boardNo}"/>
+	<input type="hidden" name="depth" th:value="${rvo.depth}"/>
+	
+	
+	<p>
+	내용: <input type="text" name="comments"/>
+	</p>
+	
+
+	<input type="submit" value="보내기">
+	
+</form>
+
+
+</body>
+
+</html>

@@ -1,0 +1,46 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="board.project.dao.FileDaoInter">
+    <insert id="fileInfoSave" parameterType="java.util.List">
+ 	INSERT INTO kmj_files (file_name, store_file_name, file_type,file_size,board_no,upload_date) VALUES
+  	<foreach collection="list" item="item" separator=",">
+   	(#{item.fileName}, #{item.storeFileName}, #{item.fileType}, #{item.fileSize}, #{item.boardNo}, NOW())
+ 	</foreach>
+</insert>
+
+<select id="downloadFileList" parameterType="fvo" resultType="fvo">
+	select file_name as fileName ,store_file_name as storeFileName, file_type as fileType, delete_chk as deleteChk from kmj_files where board_no=#{boardNo}
+</select>
+
+<select id="selectName" parameterType="String" resultType="fvo">
+	select file_name as fileName ,store_file_name as storeFileName,file_type as fileType from kmj_files where store_file_name=#{storeFilename}
+</select>
+
+
+<update id="deleteFile" parameterType="String">
+  	update kmj_files set delete_chk=0, delete_date=NOW() where store_file_name=#{storeFilename}
+</update>
+
+<select id="emptyRecyclebinChk" resultType="fvo">
+	SELECT store_file_name as storeFileName,file_type as fileType FROM kmj_files
+	WHERE delete_chk = 0 AND delete_date &lt;= DATE_SUB(NOW(), INTERVAL 3 MONTH);
+</select>
+
+<delete id="emptyRecyclebin" parameterType="String">
+	delete from kmj_files where store_file_name=#{storeFilename}
+</delete>
+
+<select id="fileChk" parameterType="int" resultType="int">
+	select count(file_name) from kmj_files where board_no=#{boardNo} and delete_chk=1;
+</select>
+
+<select id="storeFileName" resultType="String">
+	select store_file_name from kmj_files where board_no=#{boardNo}
+</select>
+
+<select id="fileDate" parameterType="String" resultType="String">
+	select upload_date from kmj_files where store_file_name=#{storeFileName}
+</select>
+
+
+</mapper>

@@ -1,0 +1,32 @@
+<!DOCTYPE html>
+<html lang="en">
+<html xmlns:th="http://www.thymeleaf.org">
+	
+<head>
+    <meta charset="UTF-8">
+    <title>Title</title>
+</head>
+<body>
+게시판 답글 쓰기 폼
+<form action="/boardReplyIn" method="post" enctype="multipart/form-data">
+	<input type="hidden" name="id" value="user1"/>
+	<input type="hidden" name="associateNo" th:value="${boardNo}"/>
+	<input type="hidden" name="depth" th:value="${depth}"/>
+	
+	<p>
+	제목: <input type="text" name="title"/>
+	</p>
+	<p>
+	내용: <input type="text" name="contents"/>
+	</p>
+	
+	<label for="filesUpload">파일 업로드 : </label>
+	<input type="file" id="filesList" name="filesList" multiple="multiple"/>
+	<input type="submit" value="보내기">
+	
+</form>
+
+
+</body>
+
+</html>

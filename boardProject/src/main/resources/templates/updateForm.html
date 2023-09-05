@@ -1,0 +1,87 @@
+<!DOCTYPE html>
+<html lang="en">
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
+<html xmlns:th="http://www.thymeleaf.org">
+
+<head>
+	<meta charset="UTF-8">
+	<title>Title</title>
+</head>
+
+<body>
+게시글 수정 폼
+
+	<form id="formSubmit" method="post" enctype="multipart/form-data">
+			<input name="boardNo" id="boardNo" type="hidden" th:value="${boardDetail.boardNo}">
+			</p>
+			<p>
+				작성자: <input name="id" th:value="${boardDetail.id}" disabled />
+			</p>
+			<p>
+				제목: <input name="title" th:value="${boardDetail.title}" />
+			</p>
+			<p>
+				<textarea name="contents" th:text="${boardDetail.contents}"></textarea>
+			</p>
+			
+			<label for="filesUpload">파일 업로드 : </label>
+			<input type="file" id="filesList" name="filesList" multiple="multiple"/>
+
+			<table>
+				<tbody>
+					<tr th:if="${item.deleteChk == 1}" th:each="item : ${downloadFileList}">
+						<td th:text="${item.deleteChk}"></td>
+						<td>
+							<a th:text="${item.fileName+'.'+item.fileType}"
+								th:href="|download/${item.storeFileName}|" />
+						</td>
+						<td><button class="deleteBtn" th:attr="data-filename=${item.storeFileName}" data-boardno="${boardDetail.boardNo}">삭제</button></td>
+					</tr>
+				</tbody>
+			</table>
+			
+			<button id="boardUpdate">수정</button>&nbsp;<button id="moveList">게시판 가기</button>
+	</form>
+
+</body>
+<script th:inline="javascript">
+$(function () {
+        $(".deleteBtn").click(function () {
+			let filename = $(this).data('filename');
+			let boardNo = $('#boardNo').val();
+			console.log('filename'+filename);
+			console.log('boardno=>'+boardNo);
+            $.ajax({
+                url: "../fileDelete",
+                data: { // 파라미터를 객체로 전달합니다.
+                    fileName: filename, // Thymeleaf의 변수 사용
+                    boardNo: boardNo // 원하는 boardNo 값을 넣어줍니다.
+                    
+                },
+                method: "POST", // HTTP 요청 방식 지정 (POST로 변경)
+                success: function (data) {
+                    $.each(data,function(index,item){
+						console.log(item.fileName);
+					});
+                },
+                error: function (xhr, status, error) {
+                    console.log("파일 삭제 실패");
+                }
+            });
+        });
+        
+        
+        $("#boardUpdate").click(function(){
+			$("#formSubmit").attr("action","boardUpdate").submit();
+		});
+		
+		$("#moveList").click(function (event) {
+    	event.preventDefault();
+    	location.href = "boardListOn";
+		});
+    });
+	
+	
+</script>
+
+</html>

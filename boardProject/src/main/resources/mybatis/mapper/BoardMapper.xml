@@ -1,0 +1,102 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="board.project.dao.BoardDaoInter">
+	<insert id="boardInsert" parameterType="bvo" useGeneratedKeys="true" keyProperty="boardNo" >
+		insert into kmj_board (associate_no, id, title, contents, create_date, update_date, post_open_id, depth) VALUES (#{associateNo}, #{id}, #{title}, #{contents}, DATE_FORMAT(CURRENT_TIMESTAMP(),'%Y-%m-%d %H:%i'),NULL, DEFAULT, DEFAULT)
+	</insert>
+	
+	<insert id="boardReplyInsert" parameterType="bvo" useGeneratedKeys="true" keyProperty="boardNo" >
+		insert into kmj_board (associate_no, id, title, contents, create_date, update_date, post_open_id, depth) VALUES (#{associateNo}, #{id}, #{title}, #{contents}, DATE_FORMAT(CURRENT_TIMESTAMP(),'%Y-%m-%d %H:%i'), DATE_FORMAT(CURRENT_TIMESTAMP(),'%Y-%m-%d %H:%i'), DEFAULT, #{depth}+1)
+	</insert>
+	
+	<select id="boardList" resultMap="boardResultMap">
+		WITH RECURSIVE cte AS (
+  		SELECT board_no, associate_no, title, contents, id, substring(create_date,1,16) as create_date, substring(update_date,1,16) as update_date, post_open_id ,file_check,depth, cast(board_no as varchar(1500)) as orderboardno
+  		FROM Kmj_Board
+  		WHERE board_no = 0
+  		UNION ALL
+  		SELECT b.board_no, b.associate_no, b.title, b.contents, b.id, substring(b.create_date,1,16), substring(b.update_date,1,16), b.post_open_id,b.file_check, b.depth, concat(c.orderboardno,'-', b.board_no) as orderboardno
+  		FROM Kmj_Board b
+  		INNER JOIN cte c ON b.associate_no = c.board_no
+  		where b.associate_no != b.board_no
+  		)
+		SELECT *
+		FROM cte
+		ORDER by cast(substring_index(substring(orderboardno,3),'-',1) as unsigned),substring(substring(orderboardno,3),locate(substring(orderboardno,3),'-',1)+1)
+	</select>
+	
+	<resultMap id="boardResultMap" type="bvo">
+    <id property="boardNo" column="board_no"/>
+    <result property="associateNo" column="associate_no"/>
+    <result property="title" column="title"/>
+    <result property="contents" column="contents"/>
+    <result property="id" column="id"/>
+    <result property="createDate" column="create_date"/>
+    <result property="updateDate" column="update_date"/>
+    <result property="postOpenId" column="post_open_id"/>
+    <result property="fileCheck" column="file_check"/>
+	</resultMap>
+	
+	<select id="boardListPaging" resultMap="boardPagingResultMap" parameterType="hashMap">
+		WITH RECURSIVE cte AS (
+  		SELECT board_no, associate_no, title, contents, id, substring(create_date,1,16) as create_date, substring(update_date,1,16) as update_date, post_open_id ,file_check,depth, cast(board_no as varchar(1500)) as orderboardno
+  		FROM Kmj_Board
+  		WHERE board_no = 0
+  		UNION ALL
+  		SELECT b.board_no, b.associate_no, b.title, b.contents, b.id, substring(b.create_date,1,16), substring(b.update_date,1,16), b.post_open_id,b.file_check, b.depth, concat(c.orderboardno,'-', b.board_no) as orderboardno
+  		FROM Kmj_Board b
+  		INNER JOIN cte c ON b.associate_no = c.board_no
+  		where
+  		<choose>
+  			<when test="#{searchValue}!=null and #{searchValue}!=''">b.associate_no != b.board_no and b.title like CONCAT('%',#{searchValue},'%')</when>
+  			<when test="#{searchValue}==''">b.associate_no != b.board_no</when>
+  		</choose>
+  		)
+		SELECT *
+		FROM cte
+		ORDER by cast(substring_index(substring(orderboardno,3),'-',1) as unsigned),substring(substring(orderboardno,3),locate(substring(orderboardno,3),'-',1)+1) limit #{startPage},5
+	</select>
+	
+	<resultMap id="boardPagingResultMap" type="bvo">
+    <id property="boardNo" column="board_no"/>
+    <result property="associateNo" column="associate_no"/>
+    <result property="title" column="title"/>
+    <result property="contents" column="contents"/>
+    <result property="id" column="id"/>
+    <result property="createDate" column="create_date"/>
+    <result property="updateDate" column="update_date"/>
+    <result property="postOpenId" column="post_open_id"/>
+    <result property="fileCheck" column="file_check"/>
+	</resultMap>
+	
+	
+	
+	<select id="boardTotalCount" parameterType="String">
+		select count(board_no) from kmj_board <where><if test="#{searchValue}!=null and #{searchValue}!=''">title like CONCAT('%',#{searchValue},'%')</if></where>
+	</select>
+	
+	<update id="boardUpdate" parameterType="bvo">
+  		update kmj_board set title=#{title},contents=#{contents},update_date=DATE_FORMAT(CURRENT_TIMESTAMP(),'%Y-%m-%d %H:%i') where board_no=#{boardNo}
+	</update>
+	
+	<update id="boardDelete" parameterType="int">
+  		update kmj_board set post_open_id=0 where board_no=#{boardNo}
+	</update>
+	
+	<select id="detailPage" parameterType="int" resultType="bvo">
+		select board_no as boardNo,id,title,contents,create_date as createDate,update_date as updateDate, depth from kmj_board where board_no=#{boardNo}
+	</select>
+	
+	<update id="fileChkUpdate" parameterType="int">
+		update kmj_board set file_check=1 where board_no=#{boardNo}
+	</update>
+	
+	<update id="fileChkDelete" parameterType="int">
+		update kmj_board set file_check=0 where board_no=#{boardNo}
+	</update>
+	
+	<update id="AssociateDelete" parameterType="int">
+		update kmj_board set post_open_id=2 where associate_no=#{boardNo}
+	</update>
+	
+</mapper>

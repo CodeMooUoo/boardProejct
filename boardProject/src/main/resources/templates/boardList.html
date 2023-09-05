@@ -1,0 +1,76 @@
+<!DOCTYPE html>
+<html lang="en">
+<html xmlns:th="http://www.thymeleaf.org">
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
+	
+<head>
+    <meta charset="UTF-8">
+    <title>Title</title>
+</head>
+<body>
+
+<table border="1">
+	
+	<tr>
+		<th>게시판 번호</th>
+		<th>작성자</th>
+		<th>제목</th>
+		<th>첨부 파일</th>
+		<th>작성 일자</th>
+	</tr>
+	
+
+	<tr th:if="${item.boardNo != 0}" th:each="item : ${boardList}" style="text-align: center;">
+		<td th:text="${item.boardNo}"></td>
+		<td th:if="${item.postOpenId != 0}" th:text = "${item.id}"></td>
+		<td th:if="${item.postOpenId != 0}"><a th:href="@{'detailPage?boardNo=' + ${item.boardNo}}" style="text-decoration: none;"><span style="color: red;" th:if="${item.postOpenId == 2}">[원글이 삭제된 게시글입니다.]</span> <span th:if="${item.postOpenId == 1}" th:text="${#strings.repeat('ㄴ', item.depth-1)}"></span> <span th:text = "${item.title}"></span></a></td>
+		<td th:if="${item.postOpenId != 0}">
+			<span th:if="${item.fileCheck!=0}">O</span>
+    		<span th:unless="${item.fileCheck!=0}">X</span>
+		</td>
+		<td th:if="${item.postOpenId != 0}" th:text = "${item.createDate}"></td>
+		<td colspan="5" th:if="${item.postOpenId == 0}">게시글이 삭제되었습니다.</td>
+	</tr>
+</table>
+
+<br>
+<button id="moveBoardForm">글쓰기</button>
+<button id="emptyRecyclebin">파일 삭제</button>
+
+<!-- 페이지 블럭 표시 -->
+<ul class="pagination" style="display: flex;">
+<!-- 이전 페이지로 이동하는 버튼 -->
+<a th:href="@{/boardListOn(currentPage=${currentPage - 1}, totalPage=${totalPage}, searchValue=${searchValue})}" th:if="${currentPage > 1}">&laquo;</a>
+
+<!-- 페이지 번호 표시 -->
+<li th:each="page : ${#numbers.sequence(startblockPage, endPage)}" style="align-items: center; list-style-type: none;">
+    <a th:href="@{/boardListOn(currentPage=${page}, totalPage=${totalPage}, searchValue=${searchValue})}"
+       th:class="${page == currentPage ? 'active' : ''}" th:text="${page}"></a><span>&nbsp;&nbsp;</span>
+</li>
+
+<!-- 다음 페이지로 이동하는 버튼 -->
+<a th:href="@{/boardListOn(currentPage=${currentPage + 1}, totalPage=${totalPage}, searchValue=${searchValue})}" th:if="${currentPage < totalPage}">&raquo;</a>
+</ul>
+
+
+<div>
+	<form action="boardListOn" method="post">
+	검색 <input type="text" name="searchValue" id="searchForm">
+	<input type="submit" value="검색하기">
+	</form>
+</div>
+
+</body>
+
+<script>
+	
+		$("#moveBoardForm").click(function () {
+			location.href = "boardForm";
+		});
+		
+		$("#emptyRecyclebin").click(function () {
+			location.href = "emptyRecyclebin";
+		});
+	
+</script>
+</html>

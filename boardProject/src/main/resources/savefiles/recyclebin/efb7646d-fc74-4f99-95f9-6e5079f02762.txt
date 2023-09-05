@@ -1,0 +1,407 @@
+
+create table Board(
+boardno number primary key,
+topboardno number,
+id varchar (35),
+title varchar(50),
+contents varchar(1000),
+bdate date,
+bupdate date
+)
+
+create table Reply(
+replyno number primary key,
+topreplyno number,
+boardno number,
+id varchar (35),
+comments varchar(150),
+rdate date,
+rupdate date
+)
+
+create table MemberTable(
+id varchar(35) primary key,
+pwd varchar(50),
+gender varchar(1),
+phone number,
+memberdate date
+)
+
+create table Files(
+filename varchar(50),
+filelocation varchar(100),
+filesize varchar(20),
+filetype varchar(8),
+filedate date,
+boardno number,
+id varchar(35)
+)
+
+
+CREATE TRIGGER board_insert_trigger
+AFTER INSERT ON Board
+FOR EACH ROW
+WHEN (NEW.file = 1)
+BEGIN
+    INSERT INTO Files (filename, filelocation, filesize, filetype, filedate, boardno, id)
+    VALUES ('filename', 'filelocation', 'filesize', 'filetype', 'filedate', 1, 'user1');
+END;
+
+
+INSERT INTO MemberTable (id, pwd, gender, phone, memberdate) VALUES
+('user1', 'password1', 'M', '010-1234-5678', '2023-01-01'),
+('user2', 'password2', 'F', '010-9876-5432', '2023-02-15'),
+('user3', 'password3', 'M', '010-1111-2222', '2023-03-30');
+
+
+INSERT INTO Board (boardno, topboardno, id, title, contents, bdate, bupdate)
+VALUES (1, 0, 'user1', '첫 번째 게시글', '첫 번째 게시글입니다.', '2023-01-01', '2023-01-01'),
+(2, 0, 'user2', '두 번째 게시글', '두 번째 게시글입니다.', '2023-01-02', '2023-01-02'),
+(3, 0, 'user3', '세 번째 게시글', '세 번째 게시글입니다.', '2023-01-03', '2023-01-03');
+
+INSERT INTO Files (filename, filelocation, filesize, filetype, filedate, boardno, id)
+SELECT 'file1.txt', '/path/to/file1.txt', '100 KB', 'txt', '2023-01-01', 1, 'user1'
+FROM Board b
+WHERE b.boardno = Board.boardno;
+
+
+INSERT INTO Reply (replyno, topreplyno, boardno, id, comments, rdate, rupdate) VALUES
+(1, 0, 1, 'user3', 'First reply to Board 1', '2023-01-01', '2023-01-01'),
+(2, 0, 1, 'user3', 'Second reply to Board 1', '2023-01-02', '2023-01-02'),
+(3, 0, 2, 'user2','Reply to Reply 1', '2023-01-03', '2023-01-03');
+
+
+
+select a.bdate, a.bupdate from Board a , Reply b;
+
+
+
+
+
+ WITH RECURSIVE  B_LIST AS (
+    select 2 as b_no , '2 게시글' as b_tit , '2 내용' as b_cont , 0 as up_b_no
+    union all
+    select 3 as b_no , '3 게시글' as b_tit , '3 내용' as b_cont , 0 as up_b_no
+    union all
+    select 4 as b_no , '4 게시글' as b_tit , '4 내용' as b_cont , 3 as up_b_no
+    union all
+    select 6 as b_no , '6 게시글' as b_tit , '6 내용' as b_cont , 3 as up_b_no
+    union all
+    select 7 as b_no , '7 게시글' as b_tit , '7 내용' as b_cont , 5 as up_b_no
+    union all
+    select 8 as b_no , '8 게시글' as b_tit , '8 내용' as b_cont , 5 as up_b_no
+    union all
+    select 9 as b_no , '9 게시글' as b_tit , '9 내용' as b_cont , 5 as up_b_no
+),
+BT_LIST as (
+   select 0 as b_no , '0 게시글' as b_tit , '0 내용' as b_cont , 0 as up_b_no
+    union all
+   select 1 as b_no , '1 게시글' as b_tit , '1 내용' as b_cont , 0 as up_b_no
+    union all
+   select 5 as b_no , '5 게시글' as b_tit , '5 내용' as b_cont , 0 as up_b_no
+    union all
+    select a.b_no, a.b_tit, a.b_cont, B.B_no
+      from B_LIST a
+    INNER
+      JOIN BT_LIST B ON A.UP_B_no = B.B_no 
+)
+select *
+  from BT_LIST 
+  
+  
+  
+select *
+  from comm_menu cm 
+ where COM_ID  = 'COM01'
+  
+  
+  
+ WITH RECURSIVE  B_LIST as (
+ 	select cm.MENU_ID , cm.UP_MENU_ID , cm.MENU_NM ,  0 as LVL
+ 	  from comm_menu cm
+ 	 where cm.COM_ID = 'COM01'
+ 	   and cm.MENU_ID  = 0
+ 	 union
+ 	select cm2.MENU_ID , cm2.UP_MENU_ID , cm2.MENU_NM , lvl + 1 as lvl
+ 	  from comm_menu cm2
+ 	 inner join B_LIST b 
+ 	    on cm2.UP_MENU_ID = b.MENU_ID 	 
+ 	 where cm2.COM_ID = 'COM01'
+ 	   and cm2.MENU_ID  <> 0
+ )
+ select a.MENU_ID , a.UP_MENU_ID , a.MENU_NM , a.lvl, concat(UP_MENU_ID, '_',   MENU_ID ) path
+   from B_LIST a
+  order by concat(UP_MENU_ID, '_',   MENU_ID )
+ 
+  
+  
+  WITH RECURSIVE B_LIST AS (
+    SELECT 2 AS b_no, '2 게시글' AS b_tit, '2 내용' AS b_cont, 0 AS up_b_no
+    UNION ALL
+    SELECT 3 AS b_no, '3 게시글' AS b_tit, '3 내용' AS b_cont, 0 AS up_b_no
+    UNION ALL
+    SELECT 4 AS b_no, '4 게시글' AS b_tit, '4 내용' AS b_cont, 3 AS up_b_no
+    UNION ALL
+    SELECT 6 AS b_no, '6 게시글' AS b_tit, '6 내용' AS b_cont, 3 AS up_b_no
+    UNION ALL
+    SELECT 7 AS b_no, '7 게시글' AS b_tit, '7 내용' AS b_cont, 5 AS up_b_no
+    UNION ALL
+    SELECT 8 AS b_no, '8 게시글' AS b_tit, '8 내용' AS b_cont, 5 AS up_b_no
+    UNION ALL
+    SELECT 9 AS b_no, '9 게시글' AS b_tit, '9 내용' AS b_cont, 5 AS up_b_no
+),
+BT_LIST AS (
+    SELECT 0 AS b_no, '0 게시글' AS b_tit, '0 내용' AS b_cont, 0 AS up_b_no
+    UNION ALL
+    SELECT 1 AS b_no, '1 게시글' AS b_tit, '1 내용' AS b_cont, 0 AS up_b_no
+    UNION ALL
+    SELECT 5 AS b_no, '5 게시글' AS b_tit, '5 내용' AS b_cont, 0 AS up_b_no
+    UNION ALL
+    SELECT a.b_no, a.b_tit, a.b_cont, B.B_no
+    FROM B_LIST a
+    INNER JOIN BT_LIST B ON A.UP_B_no = B.B_no
+    WHERE a.b_no <> 3 -- 3번 게시물은 제외
+)
+SELECT *
+FROM BT_LIST;
+
+
+
+
+
+
+WITH RECURSIVE B_LIST AS (
+    SELECT 2 AS b_no, '2 게시글' AS b_tit, '2 내용' AS b_cont, 0 AS up_b_no
+    UNION ALL
+    SELECT 4 AS b_no, '4 게시글' AS b_tit, '4 내용' AS b_cont, 3 AS up_b_no
+    UNION ALL
+    SELECT 6 AS b_no, '6 게시글' AS b_tit, '6 내용' AS b_cont, 3 AS up_b_no
+    UNION ALL
+    SELECT 7 AS b_no, '7 게시글' AS b_tit, '7 내용' AS b_cont, 5 AS up_b_no
+    UNION ALL
+    SELECT 8 AS b_no, '8 게시글' AS b_tit, '8 내용' AS b_cont, 5 AS up_b_no
+    UNION ALL
+    SELECT 9 AS b_no, '9 게시글' AS b_tit, '9 내용' AS b_cont, 5 AS up_b_no
+),
+BT_LIST AS (
+    SELECT 0 AS b_no, '0 게시글' AS b_tit, '0 내용' AS b_cont, 0 AS up_b_no
+    UNION ALL
+    SELECT 1 AS b_no, '1 게시글' AS b_tit, '1 내용' AS b_cont, 0 AS up_b_no
+    UNION ALL
+    SELECT 5 AS b_no, '5 게시글' AS b_tit, '5 내용' AS b_cont, 0 AS up_b_no
+    UNION ALL
+    SELECT a.b_no, a.b_tit, a.b_cont, B.B_no
+    FROM B_LIST a
+    INNER JOIN BT_LIST B ON A.UP_B_no = B.B_no
+    WHERE a.b_no IN (4, 6) -- 4번과 6번 게시물만 포함
+)
+SELECT *
+FROM BT_LIST;
+
+
+  
+ WITH RECURSIVE  B_LIST AS (
+    select 2 as b_no , '2 게시글' as b_tit , '2 내용' as b_cont , 0 as up_b_no
+    union all
+    select 4 as b_no , '4 게시글' as b_tit , '4 내용' as b_cont , 3 as up_b_no
+    union all
+    select 6 as b_no , '6 게시글' as b_tit , '6 내용' as b_cont , 3 as up_b_no
+    union all
+    select 7 as b_no , '7 게시글' as b_tit , '7 내용' as b_cont , 5 as up_b_no
+    union all
+    select 8 as b_no , '8 게시글' as b_tit , '8 내용' as b_cont , 5 as up_b_no
+    union all
+    select 9 as b_no , '9 게시글' as b_tit , '9 내용' as b_cont , 5 as up_b_no
+),
+BT_LIST as (
+   select 0 as b_no , '0 게시글' as b_tit , '0 내용' as b_cont , 0 as up_b_no
+    union all
+   select 1 as b_no , '1 게시글' as b_tit , '1 내용' as b_cont , 0 as up_b_no
+    union all
+   select 5 as b_no , '5 게시글' as b_tit , '5 내용' as b_cont , 0 as up_b_no
+    union all
+    select a.b_no, a.b_tit, a.b_cont, B.B_no
+      from B_LIST a
+    INNER
+      JOIN BT_LIST B ON A.UP_B_no = B.B_no 
+)
+select *
+  from BT_LIST 
+  
+  
+  
+  WITH RECURSIVE B_LIST AS (
+    SELECT 2 AS b_no, '2 게시글' AS b_tit, '2 내용' AS b_cont, 0 AS up_b_no
+    UNION ALL
+    SELECT 4 AS b_no, '4 게시글' AS b_tit, '4 내용' AS b_cont, 3 AS up_b_no
+    UNION ALL
+    SELECT 6 AS b_no, '6 게시글' AS b_tit, '6 내용' AS b_cont, 3 AS up_b_no
+    UNION ALL
+    SELECT 7 AS b_no, '7 게시글' AS b_tit, '7 내용' AS b_cont, 5 AS up_b_no
+    UNION ALL
+    SELECT 8 AS b_no, '8 게시글' AS b_tit, '8 내용' AS b_cont, 5 AS up_b_no
+    UNION ALL
+    SELECT 9 AS b_no, '9 게시글' AS b_tit, '9 내용' AS b_cont, 5 AS up_b_no
+),
+BT_LIST AS (
+    SELECT 0 AS b_no, '0 게시글' AS b_tit, '0 내용' AS b_cont, 0 AS up_b_no
+    UNION ALL
+    SELECT 1 AS b_no, '1 게시글' AS b_tit, '1 내용' AS b_cont, 0 AS up_b_no
+    UNION ALL
+    SELECT 5 AS b_no, '5 게시글' AS b_tit, '5 내용' AS b_cont, 0 AS up_b_no
+    UNION ALL
+    SELECT a.b_no, a.b_tit, a.b_cont, B.B_no
+    FROM B_LIST a
+    INNER JOIN BT_LIST B ON A.UP_B_no = B.B_no 
+    WHERE a.b_no IN (4, 6) -- 4번과 6번 게시물 포함
+)
+SELECT *
+FROM BT_LIST;
+ 
+
+
+
+
+
+
+
+WITH RECURSIVE B_LIST AS (
+    SELECT 2 AS b_no, '2 게시글' AS b_tit, '2 내용' AS b_cont, 0 AS up_b_no
+    UNION ALL
+    SELECT 4 AS b_no, '4 게시글' AS b_tit, '4 내용' AS b_cont, 3 AS up_b_no
+    UNION ALL
+    SELECT 6 AS b_no, '6 게시글' AS b_tit, '6 내용' AS b_cont, 3 AS up_b_no
+    UNION ALL
+    SELECT 7 AS b_no, '7 게시글' AS b_tit, '7 내용' AS b_cont, 5 AS up_b_no
+    UNION ALL
+    SELECT 8 AS b_no, '8 게시글' AS b_tit, '8 내용' AS b_cont, 5 AS up_b_no
+    UNION ALL
+    SELECT 9 AS b_no, '9 게시글' AS b_tit, '9 내용' AS b_cont, 5 AS up_b_no
+),
+BT_LIST AS (
+    SELECT 2 AS b_no, '2 게시글' AS b_tit, '2 내용' AS b_cont, 0 AS up_b_no -- 추가된 부분
+    UNION ALL
+    SELECT 4 AS b_no, '4 게시글' AS b_tit, '4 내용' AS b_cont, 3 AS up_b_no -- 추가된 부분
+    UNION ALL
+    SELECT 6 AS b_no, '6 게시글' AS b_tit, '6 내용' AS b_cont, 3 AS up_b_no -- 추가된 부분
+    UNION ALL
+    SELECT 7 AS b_no, '7 게시글' AS b_tit, '7 내용' AS b_cont, 5 AS up_b_no
+    UNION ALL
+    SELECT 8 AS b_no, '8 게시글' AS b_tit, '8 내용' AS b_cont, 5 AS up_b_no
+    UNION ALL
+    SELECT 9 AS b_no, '9 게시글' AS b_tit, '9 내용' AS b_cont, 5 AS up_b_no
+    UNION ALL
+    SELECT 0 AS b_no, '0 게시글' AS b_tit, '0 내용' AS b_cont, 0 AS up_b_no
+    UNION ALL
+    SELECT 1 AS b_no, '1 게시글' AS b_tit, '1 내용' AS b_cont, 0 AS up_b_no
+    UNION ALL
+    SELECT 5 AS b_no, '5 게시글' AS b_tit, '5 내용' AS b_cont, 0 AS up_b_no
+)
+SELECT *
+FROM BT_LIST;  
+
+
+
+create table TestBoard (
+cid number primary key,
+refid number,
+depthnum number,
+ordernum number
+)
+
+
+insert into TestBoard values(5,4,1,1);
+
+
+
+select * from TestBoard order by refid asc, ordernum asc;
+
+
+
+ WITH RECURSIVE  B_LIST AS (
+ 	select 1 as b_no , '1 게시글' as b_tit , '1 내용' as b_cont , 3 as up_b_no
+    union all
+    select 2 as b_no , '2 게시글' as b_tit , '2 내용' as b_cont , 0 as up_b_no
+    union all
+    select 3 as b_no , '3 게시글' as b_tit , '3 내용' as b_cont , 0 as up_b_no
+    union all
+    select 4 as b_no , '4 게시글' as b_tit , '4 내용' as b_cont , 3 as up_b_no
+),
+BT_LIST as (
+   select 0 as b_no , '0 게시글' as b_tit , '0 내용' as b_cont , 0 as up_b_no
+    union all
+    select a.b_no, a.b_tit, a.b_cont, B.B_no
+      from B_LIST a
+    INNER
+      JOIN BT_LIST B ON A.UP_B_no = B.B_no
+)
+select *
+  from BT_LIST 
+  
+  
+  
+ WITH RECURSIVE  B_LIST AS (
+ 	select 1 as b_no , '1 게시글' as b_tit , '1 내용' as b_cont , 3 as up_b_no
+    union all
+    select 2 as b_no , '2 게시글' as b_tit , '2 내용' as b_cont , 5 as up_b_no
+    union all
+    select 3 as b_no , '3 게시글' as b_tit , '3 내용' as b_cont , 5 as up_b_no
+    union all
+    select 4 as b_no , '4 게시글' as b_tit , '4 내용' as b_cont , 3 as up_b_no
+    union all
+    select 5 as b_no , '5 게시글' as b_tit , '5 내용' as b_cont , 0 as up_b_no
+    union all
+    select 6 as b_no , '6 게시글' as b_tit , '6 내용' as b_cont , 0 as up_b_no
+    union all
+    select 7 as b_no , '7 게시글' as b_tit , '7 내용' as b_cont , 0 as up_b_no
+    union all
+    select 8 as b_no , '8 게시글' as b_tit , '8 내용' as b_cont , 0 as up_b_no
+    union all
+    select 9 as b_no , '9 게시글' as b_tit , '9 내용' as b_cont , 7 as up_b_no
+    union all
+    select 10 as b_no , '10 게시글' as b_tit , '10 내용' as b_cont , 7 as up_b_no
+),
+BT_LIST as (
+   select 0 as b_no , '0 게시글' as b_tit , '0 내용' as b_cont , 0 as up_b_no
+    union all
+    select a.b_no, a.b_tit, a.b_cont, B.B_no
+      from B_LIST a
+    INNER
+      JOIN BT_LIST B ON A.UP_B_no = B.B_no order by b_no
+)
+select *
+  from BT_LIST 
+  
+  
+  
+  
+ with recursive cte as (
+ 	select boardno, topboardno, title, contents, id, bdate, bupdate
+ 	from Board
+ 	where topboardno = 0
+ 	UNION ALL
+ 	select t1.boardno, t1.topboardno, t1.title, t1.contents, t1.id, t1.bdate, t1.bupdate
+ 	from Board t1
+ 	inner join cte c
+ 	on t1.topboardno = c.boardno
+ )select *
+ from cte
+
+
+ 
+WITH RECURSIVE cte AS (
+  SELECT boardno, topboardno, title, contents, id, bdate, bupdate, boardno as orderboardno
+  FROM Board
+  WHERE topboardno = 0
+  UNION ALL
+  SELECT b.boardno, b.topboardno, b.title, b.contents, b.id, b.bdate, b.bupdate, (c.orderboardno || '-' || b.boardno) as orderboardno
+  FROM Board b
+  INNER JOIN cte c ON b.topboardno = c.boardno
+)
+SELECT *
+FROM cte
+ORDER BY orderboardno;
+ 
+ 
+
+

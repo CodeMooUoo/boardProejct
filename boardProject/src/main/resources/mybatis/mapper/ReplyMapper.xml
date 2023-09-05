@@ -1,0 +1,53 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="board.project.dao.ReplyDaoInter">
+	
+	<insert id="replyInsert" parameterType="rvo">
+	insert into kmj_reply (associate_no, board_no, id, comments, create_date, update_date, post_open_id, depth) VALUES (#{associateNo},#{boardNo}, #{id}, #{comments}, DATE_FORMAT(CURRENT_TIMESTAMP(),'%Y-%m-%d %H:%i'),NULL, DEFAULT,DEFAULT)
+	</insert>
+	
+	<insert id="replyReplyInsert" parameterType="rvo">
+	insert into kmj_reply (associate_no, board_no, id, comments, create_date, update_date, post_open_id, depth) VALUES (#{associateNo},#{boardNo}, #{id}, #{comments}, DATE_FORMAT(CURRENT_TIMESTAMP(),'%Y-%m-%d %H:%i'),NULL, DEFAULT,#{depth}+1)
+	</insert>
+	
+	<select id="replyList" resultMap="replyResultMap" parameterType="int">
+	WITH RECURSIVE cte AS (
+  	SELECT reply_no, associate_no, id, comments, substring(create_date,1,16) as create_date, substring(update_date,1,16) as update_date, post_open_id, depth , cast(reply_no as varchar(1500)) as orderreplyno
+  	FROM kmj_reply
+  	WHERE reply_no = 0
+  	UNION ALL
+  	SELECT b.reply_no, b.associate_no, b.id, b.comments, substring(b.create_date,1,16), substring(b.update_date,1,16), b.post_open_id, b.depth, concat(c.orderreplyno,'-', b.reply_no) as orderreplyno
+  	FROM kmj_reply b
+  	INNER JOIN cte c ON b.associate_no = c.reply_no and board_no=#{boardNo}
+	)
+	SELECT *
+	FROM cte
+	ORDER BY cast(substring_index(substring(orderreplyno,3),'-',1) as unsigned), substring(substring(orderreplyno,3),locate(substring(orderreplyno,3),'-',1)+1)
+	</select>
+
+	<resultMap id="replyResultMap" type="rvo">
+    <id property="replyNo" column="reply_no"/>
+    <result property="associateNo" column="associate_no"/>
+    <result property="id" column="id"/>
+    <result property="comments" column="comments"/>
+    <result property="createDate" column="create_date"/>
+    <result property="updateDate" column="update_date"/>
+    <result property="postOpenId" column="post_open_id"/>
+    <result property="depth" column="depth"/>
+	</resultMap>
+	
+	
+	
+	<update id="replyUpdate" parameterType="rvo">
+  	update kmj_reply set comments=#{comments},update_date=DATE_FORMAT(CURRENT_TIMESTAMP(),'%Y-%m-%d %H:%i') where reply_no=#{replyNo}
+	</update>
+	
+	<update id="replyDelete" parameterType="int">
+  	update kmj_reply set post_open_id=0 where reply_no=#{replyNo}
+	</update>
+	
+	<delete id="associateReplyDelete" parameterType="int">
+	delete from kmj_reply where board_no=#{boardNo} 
+	</delete>
+	
+</mapper>

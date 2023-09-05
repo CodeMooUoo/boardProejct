@@ -1,0 +1,155 @@
+#공통적용 내용으로 반드시 채워주셔야 합니다.
+spring:
+  application:
+    #업무명
+    name: ems
+  config:
+    #core.yaml(do not modify!)
+    import: application-core.yaml
+  datasource:
+    #db type으로 반드시 지정하여야 한다.(mapper-scan용)
+    db-type: maria
+    #db-type: mssql
+    serverIp: ap.kfems.net
+    port: 13306
+    databaseName: fems
+    username: femsadmin
+    password: fems2021!
+  profiles:
+    #프로파일(local:개발자 환경, dev:개발서버, prod:운영 택1, 향후 runtime argument로 넘어갈 예정)
+    active: local
+    
+#Machbase 기본포트 : 5656, ip변경 필요
+machbase:
+  driver-class-name: com.machbase.jdbc.driver
+  url: jdbc:machbase://192.168.0.43:5656/mhdb
+  username: sys
+  password: manager
+  
+#로깅관련 (공통)
+logging:
+  loginLogEnable: true
+  menuCnctLogEnable: true
+  #logging
+  config: classpath:logback_spring.xml
+  file:
+    path: logs
+    max-history: 30
+    max-size: 100MB
+    
+# API 연결 정보
+api:
+  das:
+    mode: http
+    host: 10.210.1.20
+    port: 30021
+    query:
+      dps:
+        prefix: /tsdb/query/fems/v1/dps/tag
+      last:
+        prefix: /tsdb/query/fems/v1/last/tag
+
+#이하 해당 프로젝트에서 profile별로 필요한 정보를 세팅한다.(default와 중복될 경우 override)
+#DB외 SPRING과 관련된 직접적인 셋팅은 자제하고, 이 외 필요한 것들만 선언해서 사용한다.
+--- 
+##############
+####local#####
+##############
+spring:
+  config:
+    activate:
+      on-profile: local
+  datasource:
+    driver-class-name: org.mariadb.jdbc.Driver
+    url: jdbc:mariadb://${spring.datasource.serverIp}:${spring.datasource.port}/${spring.datasource.databaseName}
+    username: femsadmin
+    password: fems2021!
+
+  gatewayUrl: http://localhost:9999
+#  datasource:
+#      db-type: maria #db type으로 반드시 지정하여야 한다.(essential!)
+#      driver-class-name: net.sf.log4jdbc.sql.jdbcapi.DriverSpy
+#      url: jdbc:log4jdbc:mariadb://ap.kfems.net:13306/fems_test
+#      username: fems_test
+#      password: fems2021
+  
+#로깅관련
+logging:
+  loginLogEnable: true
+  menuCnctLogEnable: true
+  level:
+    root: DEBUG
+  #logging
+  config: classpath:logback_spring.xml
+  file:
+    path: logs
+    max-history: 30
+    max-size: 100MB
+  
+server:
+  #port설정
+  port: 8082
+
+# API 연결 정보
+api:
+  das:
+    mode: http
+    host: 10.210.1.20
+    port: 30021
+    query:
+      dps:
+        prefix: /tsdb/query/fems/v1/dps/tag
+      last:
+        prefix: /tsdb/query/fems/v1/last/tag
+--- 
+##############
+####Docker####
+##############
+spring:
+  config:
+    activate:
+      on-profile: docker
+  datasource:
+    driver-class-name: org.mariadb.jdbc.Driver
+    url: jdbc:mariadb://${spring.datasource.serverIp}:${spring.datasource.port}/${spring.datasource.databaseName}
+    username: femsadmin
+    password: fems2021!
+  gatewayUrl: http://apigw:9999
+
+#로깅관련  
+logging:
+  loginLogEnable: true
+  menuCnctLogEnable: true
+  level:
+    root: DEBUG
+  #logging  
+  config: classpath:logback_spring.xml
+  file:
+    path: logs
+    max-history: 30
+    max-size: 100MB
+  
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health, info, prometheus
+  metrics:
+    tags:
+      application: ${spring.application.name}
+ 
+server:
+  #port설정
+  port: 8082
+
+# API 연결 정보
+api:
+  das:
+    mode: http
+    host: 10.210.1.20
+    port: 30021
+    query:
+      dps:
+        prefix: /tsdb/query/fems/v1/dps/tag
+      last:
+        prefix: /tsdb/query/fems/v1/last/tag

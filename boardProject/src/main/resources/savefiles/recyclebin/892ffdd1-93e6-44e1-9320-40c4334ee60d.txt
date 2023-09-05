@@ -1,0 +1,41 @@
+--회원 테이블
+create table kmj_membertable(
+id varchar2(20) primary key,
+pwd varchar2(50) NOT NULL,
+gender varchar2(4) NOT NULL,
+phone number NOT NULL,
+join_date date DEFAULT NULL,
+);
+
+--게시판 테이블
+create table kmj_board(
+board_no number primary key,
+associate_no number DEFAULT NULL,
+id varchar2(20) DEFAULT NULL,
+title varchar2(50) NOT NULL,
+contents varchar2(1000) NOT NULL,
+create_date datetime DEFAULT NULL,
+update_date datetime DEFAULT NULL,
+post_open_id number DEFAULT 1,
+file_check number DEFAULT 0
+);
+
+--게시판 파일 첨부 테이블
+create table kmj_files(
+file_name varchar2(50) NOT NULL,
+store_file_name varchar2(50) DEFAULT NULL,
+file_type varchar2(25) DEFAULT NULL,
+file_size number DEFAULT NULL,
+board_no number DEFAULT NULL,
+upload_date date DEFAULT NULL,
+delete_date date DEFAULT NULL,
+delete_chk number DEFAULT 1
+);
+
+
+--시퀀스 생성
+create sequence kmj_membertable_seq
+increment by 1 start with 1;
+
+create sequence kmj_board_seq
+increment by 1 start with 1;

@@ -1,0 +1,194 @@
+#공통적용 내용으로 반드시 채워주셔야 합니다.
+spring:
+  application:
+    #업무명
+    name: comm
+  config:
+    #core.yaml(do not modify!)
+    import: application-core.yaml
+  datasource:
+    #db type으로 반드시 지정하여야 한다.(mapper-scan용)
+    db-type: maria
+    #db-type: mssql
+    serverIp: 192.168.0.151
+    port: 3306   
+    databaseName: fems
+    username: femsadmin
+    password: fems2021!
+
+  profiles:
+    #프로파일(local:개발자 환경, dev:개발서버, prod:운영 택1, 향후 runtime argument로 넘어갈 예정)
+    active: local
+
+# API 연결 정보
+api:
+  batch:
+    mode: ${API_BATCH_MODE:http}
+    host: ${API_BATCH_HOST:localhost}
+    port: ${API_BATCH_PORT:8888}
+
+#이하 해당 프로젝트에서 profile별로 필요한 정보를 세팅한다.(default와 중복될 경우 override)
+#DB외 SPRING과 관련된 직접적인 셋팅은 자제하고, 이 외 필요한 것들만 선언해서 사용한다. (t)
+---
+##############
+####local#####
+##############
+spring:
+  config:
+    activate:
+      on-profile: local
+#    datasource:
+#      db-type: maria #db type으로 반드시 지정하여야 한다.(essential!)
+#      driver-class-name: net.sf.log4jdbc.sql.jdbcapi.DriverSpy
+#      url: jdbc:log4jdbc:mariadb://ap.kfems.net:13306/fems_test
+#      username: fems_test
+#      password: fems2021
+  gatewayUrl: http://localhost:9999
+  #datasource-mssql
+  datasource:
+    driver-class-name: org.mariadb.jdbc.Driver
+    url: jdbc:mariadb://${spring.datasource.serverIp}:${spring.datasource.port}/${spring.datasource.databaseName}
+    username: femsadmin
+    password: fems2021!
+#로깅관련
+logging:
+  loginLogEnable: true
+  menuCnctLogEnable: true
+  level:
+    root: DEBUG
+  #logging
+  config: classpath:logback_spring.xml
+  file:
+    path: logs
+    max-history: 30
+    max-size: 100MB
+
+server:
+  #port설정
+  port: 8080
+
+---
+##############
+####Docker#####
+##############
+spring:
+  config:
+    activate:
+      on-profile: docker
+  gatewayUrl: http://apigw:9999
+  #datasource-mssql
+  datasource:
+    driver-class-name: org.mariadb.jdbc.Driver
+    url: jdbc:mariadb://${spring.datasource.serverIp}:${spring.datasource.port}/${spring.datasource.databaseName}
+    username: femsadmin
+    password: fems2021!
+
+#로깅관련
+logging:
+  loginLogEnable: true
+  menuCnctLogEnable: true
+  level:
+    root: DEBUG
+  #logging
+  config: classpath:logback_spring.xml
+  file:
+    path: logs
+    max-history: 30
+    max-size: 100MB
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health, info, prometheus
+  metrics:
+    tags:
+      application: ${spring.application.name}
+
+server:
+  #port설정
+  port: 8080
+---
+##############
+####Cloud#####
+##############
+spring:
+  config:
+    activate:
+      on-profile: cloud
+  gatewayUrl: http://139.150.73.181:9999
+  #datasource-mssql
+  datasource:
+    driver-class-name: org.mariadb.jdbc.Driver
+    url: jdbc:mariadb://${spring.datasource.serverIp}:${spring.datasource.port}/${spring.datasource.databaseName}
+    username: femsadmin
+    password: fems2021!
+
+#로깅관련
+logging:
+  loginLogEnable: true
+  menuCnctLogEnable: true
+  level:
+    root: DEBUG
+  #logging
+  config: classpath:logback_spring.xml
+  file:
+    path: logs
+    max-history: 30
+    max-size: 100MB
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health, info, prometheus
+  metrics:
+    tags:
+      application: ${spring.application.name}
+
+server:
+  #port설정
+  port: 8080
+
+---
+##############
+####Cloud#####
+##############
+spring:
+  config:
+    activate:
+      on-profile: cloud_test
+  gatewayUrl: /
+  #datasource-mssql
+  datasource:
+    driver-class-name: org.mariadb.jdbc.Driver
+    url: jdbc:mariadb://${DATABASE_HOST:192.168.0.151}:${DATABASE_PORT:3306}/${DATABASE_NAME:fems}
+    username: ${DATABASE_USER:femsadmin}
+    password: ${DATABASE_SECRT:#{'fems2021!'}}
+
+#로깅관련
+logging:
+  loginLogEnable: true
+  menuCnctLogEnable: true
+  level:
+    root: DEBUG
+  #logging
+  config: classpath:logback_spring.xml
+  file:
+    path: logs
+    max-history: 30
+    max-size: 100MB
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health, info, prometheus
+  metrics:
+    tags:
+      application: ${APP_NAME:kfems_comm}
+
+server:
+  #port설정
+  port: 8080
+

@@ -54,7 +54,7 @@
   		)
 		SELECT *
 		FROM cte
-		ORDER by cast(substring_index(substring(orderboardno,3),'-',1) as unsigned),substring(substring(orderboardno,3),locate(substring(orderboardno,3),'-',1)+1) limit #{startPage},5
+		ORDER by cast(substring_index(substring(orderboardno,3),'-',1) as unsigned),substring(substring(orderboardno,3),locate(substring(orderboardno,3),'-',1)+1) limit #{startPage},10
 	</select>
 	
 	<resultMap id="boardPagingResultMap" type="bvo">

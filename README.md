@@ -1,5 +1,6 @@
 # 게시판 구현 프로젝트
 ### 사용기술: java, springboot, Mybatis SQL Mapper / RDB: mariadb / template engine: Thymeleaf
+### 프로젝트 설명: 게시글등록과 댓글, 이미지 업로드를 할 수 있는 게시판입니다.
 #### 게시판 기능
 1. 게시글 등록
 2. 게시글 수정
